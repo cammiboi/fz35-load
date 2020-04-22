@@ -1,9 +1,4 @@
 from serial import Serial
-from time import sleep
-
-# wait for new bytes to arrive
-# wait until its success for fail
-# return result
 
 
 class FZ35():
@@ -35,7 +30,7 @@ class FZ35():
         return reply
 
     def check_success(self):
-        for i in range(0,5):
+        for i in range(0, 5):
             reply = self.get_reply()
             if reply == "sucess":
                 return True
@@ -45,10 +40,25 @@ class FZ35():
                 return False
             elif reply == "":
                 return False
-    
+
+    def parse_measurements(self, measurement: str):
+        try:
+            nums = measurement.split(',')
+            print(nums)
+            if len(nums) != 4:
+                return False
+            v = float(nums[0].replace('V', ''))
+            a = float(nums[1].replace('A', ''))
+            ah = float(nums[2].replace('Ah', ''))
+            h, m = nums[3].split(':')
+            t = (int(h) * 60) + int(m)
+            return a, v, ah, t
+        except (ValueError):
+            return False
+
     def get_measurement(self):
         reply = self.get_reply()
-        return reply
+        return self.parse_measurements(reply)
 
     def turn_on(self):
         self.send_command("on")
@@ -60,22 +70,3 @@ class FZ35():
         num = self.format_number(current, 1, 2)
         cmd = "{}A".format(num)
         self.send_command(cmd)
-
-
-if __name__ == '__main__':
-
-    # example script to control load
-    load = FZ35("COM8")
-    sleep(1)
-    load.set_current(3)
-    sleep(3)
-    load.set_current(0.06)
-    load.set_current(0.05)
-    load.set_current(0.03)
-    load.set_current(0.0)
-    load.send_command("dhhdhdff")
-    sleep(1)
-    load.turn_off()
-    sleep(1)
-    load.turn_on()
-    print(load.get_measurement())
