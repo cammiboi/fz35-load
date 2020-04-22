@@ -1,9 +1,9 @@
-import serial
+from serial import Serial
 from time import sleep
 
 class FZ35():
     def __init__(self, serial_port: str):
-        self.ser = serial.Serial(serial_port)
+        self.ser = Serial(serial_port)
         self.send_command("start") # tell load to send its measurement every second
 
     def send_command(self, command: str):
@@ -30,6 +30,7 @@ if __name__ == '__main__':
 
     # example script to control load
     load = FZ35("COM8")
+    sleep(1)
     load.set_current(3)
     sleep(3)
     load.set_current(0.06)
