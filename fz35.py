@@ -3,8 +3,8 @@ from serial import Serial
 
 class FZ35():
     def __init__(self, serial_port: str):
-        # open serial port for load and set receieve timeout to 1.5 sec
-        self.ser = Serial(port=serial_port, timeout=1.5)
+        # open serial port for load and set receieve timeout to 2 sec
+        self.ser = Serial(port=serial_port, timeout=2)
         # tell load to send its measurement every second
         self.send_command("start")
 
@@ -45,20 +45,22 @@ class FZ35():
         try:
             nums = measurement.split(',')
             print(nums)
-            if len(nums) != 4:
-                return 88,88,88,88
             v = float(nums[0].replace('V', ''))
             a = float(nums[1].replace('A', ''))
             ah = float(nums[2].replace('Ah', ''))
             h, m = nums[3].split(':')
             t = (int(h) * 60) + int(m)
             return a, v, ah, t
-        except (ValueError):
-            return 99,99,99,99
+        except (ValueError, TypeError):
+            return False
 
     def get_measurement(self):
-        reply = self.get_reply()
-        return self.parse_measurements(reply)
+        for n in range(0, 3):  # retry up to 3 times if getting measurement fails
+            reply = self.get_reply()
+            meas = self.parse_measurements(reply)
+            if meas:
+                return meas
+        return False
 
     def turn_on(self):
         self.send_command("on")
@@ -70,3 +72,43 @@ class FZ35():
         num = self.format_number(current, 1, 2)
         cmd = "{}A".format(num)
         self.send_command(cmd)
+
+    def set_low_voltage_protection(voltage: float):
+        num = self.format_number(voltage, 2, 1)
+        cmd = "LVP:{}".format(num)
+        self.send_command(cmd)
+
+    def set_over_voltage_protection(voltage: float):
+        num = self.format_number(voltage, 2, 1)
+        cmd = "OVP:{}".format(num)
+        self.send_command(cmd)
+
+    def set_over_current_protection(current: float):
+        num = self.format_number(current, 1, 2)
+        cmd = "OCP:{}".format(num)
+        self.send_command(cmd)
+
+    def set_over_power_protection(power: float):
+        num = self.format_number(power, 2, 2)
+        cmd = "OPP:{}".format(num)
+        self.send_command(cmd)
+
+    def set_max_ah_protection(ah: float):
+        num = self.format_number(ah, 1, 3)
+        cmd = "OAH:{}".format(num)
+        self.send_command(cmd)
+
+    def set_max_time_protection(min: int):
+        hr = int(min / 60)
+        min = min - (hr * 60)
+        hr = format(hr, "02.0f")
+        min = format(min, "02.0f")
+        cmd = "OHP:{}:{}".format(hr, min)
+        self.send_command(cmd)
+
+    def get_protection_settings():
+        self.send_command("read")
+        reply = self.get_reply
+        if reply.startswith("OVP"):
+            return reply
+        return False
