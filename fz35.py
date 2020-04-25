@@ -46,7 +46,7 @@ class FZ35():
             nums = measurement.split(',')
             print(nums)
             if len(nums) != 4:
-                return False
+                return 88,88,88,88
             v = float(nums[0].replace('V', ''))
             a = float(nums[1].replace('A', ''))
             ah = float(nums[2].replace('Ah', ''))
@@ -54,7 +54,7 @@ class FZ35():
             t = (int(h) * 60) + int(m)
             return a, v, ah, t
         except (ValueError):
-            return False
+            return 99,99,99,99
 
     def get_measurement(self):
         reply = self.get_reply()
