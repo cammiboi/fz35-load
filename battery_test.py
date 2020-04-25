@@ -3,6 +3,7 @@ from time import sleep
 import csv
 
 load = FZ35("COM8")
+load.get_protection_settings()
 
 battery_current = 0.1
 
