@@ -53,7 +53,7 @@ class FZ35():
             h, m = nums[3].split(':')
             t = (int(h) * 60) + int(m)
             return a, v, ah, t
-        except (ValueError, TypeError):
+        except (ValueError, IndexError, TypeError):
             return False
 
     def get_measurement(self):
