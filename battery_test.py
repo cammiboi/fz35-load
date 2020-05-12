@@ -5,11 +5,11 @@ import csv
 load = FZ35("COM8")
 load.get_protection_settings()
 
-battery_current = 0.1
+battery_current = 0.05
 
 stop_ah = 0.5
 
-file_name = "battery_discharge_{}A.csv".format(battery_current)
+file_name = "battery_discharge_{}A_sample_3.csv".format(battery_current)
 
 with open(file_name, 'w', newline='') as csvfile:
     csv_writer = csv.writer(csvfile)
@@ -22,15 +22,19 @@ with open(file_name, 'w', newline='') as csvfile:
     csv_writer.writerow(['A', 'V', 'Ah', 'min'])
 
     while 1:
-        a, v, ah, t = load.get_measurement()
-        csv_writer.writerow([a, v, ah, t])
+        try:
+            a, v, ah, t = load.get_measurement()
 
-        if v <= 2:
-            print('low voltage, stopping test')
-            break
+            if v <= 1:
+                print('low voltage, stopping test')
+                break
 
-        if a == 0:
-            print('current 0, stopping test')
-            break
+            if a == 0:
+                print('current 0, stopping test')
+                break
+
+            csv_writer.writerow([a, v, ah, t])
+        except:
+            pass
 
 load.turn_off()
